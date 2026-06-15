@@ -7,8 +7,8 @@ export function CVPreview({ cv }: { cv: CVJson }) {
     .join('  •  ')
   return (
     <article className="bg-card border border-line rounded-[var(--radius-card)] p-8 sm:p-10 shadow-[0_1px_2px_rgba(33,29,24,0.04),0_8px_24px_-12px_rgba(33,29,24,0.12)] text-sm leading-relaxed text-ink max-w-2xl mx-auto">
-      <h1 className="font-display text-3xl text-ink leading-tight">{cv.name}</h1>
-      <p className="text-ink-faint mb-6 mt-1">{contact}</p>
+      <h1 className="font-display text-3xl text-ink leading-none">{cv.name}</h1>
+      <p className="text-ink-faint mb-6 mt-2">{contact}</p>
 
       {cv.summary && (
         <section className="mb-5">

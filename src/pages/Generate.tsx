@@ -101,15 +101,17 @@ export function Generate() {
       // we already have and never block the user on the optimizer.
       try {
         setGenStatus('Optimising length…')
-        for (let pass = 0; pass < 2; pass++) {
+        for (let pass = 0; pass < 3; pass++) {
           const metrics = await measurePdf(await renderPdf(cv))
           if (metrics.pages <= 1) break // ideal: one page
           if (metrics.pages === 2 && metrics.lastPageFillRatio >= 0.55) break // legit full two-pager
 
+          // The model can't see the rendered page — give it the measured numbers.
+          const pct = Math.round(metrics.lastPageFillRatio * 100)
           const instruction =
             metrics.pages === 2 && metrics.lastPageFillRatio < 0.55
-              ? 'Your CV rendered to two pages but the second page is nearly empty — this looks unprofessional. Compress it to fit EXACTLY ONE page: tighten the summary, cut the weakest bullets, and trim or merge the least-relevant older roles. Keep all the strongest, most relevant content.'
-              : `Your CV rendered to ${metrics.pages} pages, which is too long. Cut it down to a tight TWO pages maximum — drop the least-relevant roles and bullets, keep the strongest evidence.`
+              ? `MEASURED LAYOUT FEEDBACK (you cannot see the rendered pages, so trust these exact numbers): your CV currently renders to 2 pages, and the SECOND page is only about ${pct}% full — that near-empty second page looks unprofessional. A CV must be EITHER a clean single page OR a full two pages. Pull it back to ONE page: tighten the summary, cut the weakest bullets, and trim or merge the least-relevant older roles. There is roughly ${pct}% of one page of content to remove. Keep all the strongest, most relevant content.`
+              : `MEASURED LAYOUT FEEDBACK (you cannot see the rendered pages, so trust these exact numbers): your CV currently renders to ${metrics.pages} pages, which is too long. Cut it to a tight TWO pages maximum — drop the least-relevant roles and bullets, keep the strongest evidence.`
 
           const refined = await requestTailor({
             password,
@@ -128,14 +130,14 @@ export function Generate() {
         // isn't achievable without dropping strong content — so use the space well.
         const finalMetrics = await measurePdf(await renderPdf(cv)).catch(() => null)
         if (finalMetrics && finalMetrics.pages === 2 && finalMetrics.lastPageFillRatio < 0.5) {
+          const pct = Math.round(finalMetrics.lastPageFillRatio * 100)
           const filled = await requestTailor({
             password,
             master: master.text,
             jd,
             prefs: getPrefs(),
             priorCv: cv,
-            refineInstruction:
-              'This CV needs two pages but the second is sparse. Since one page is not achievable without dropping strong content, instead use the full two pages well: add depth (an extra strong bullet) to the top 2–3 roles and a slightly fuller summary so both pages feel complete and intentional. Do not pad with fluff.',
+            refineInstruction: `MEASURED LAYOUT FEEDBACK (you cannot see the rendered pages, so trust these exact numbers): this CV uses 2 pages but the second is only about ${pct}% full. One page isn't achievable without dropping strong content, so instead fill the two pages properly — there is roughly ${100 - pct}% of a page of empty space to use. Add genuine depth: an extra strong, specific bullet to the top 2–3 roles and a slightly fuller summary, so both pages feel complete and intentional. Do not pad with fluff or filler.`,
           })
           cv = filled.cv
           fit = filled.fitReport

@@ -13,8 +13,8 @@ const s = StyleSheet.create({
   },
 
   // Header
-  name: { fontSize: 22, fontFamily: 'Helvetica-Bold', marginBottom: 6 },
-  contact: { fontSize: 9, color: '#666', lineHeight: 1.3, marginBottom: 2 },
+  name: { fontSize: 22, fontFamily: 'Helvetica-Bold', lineHeight: 1, marginBottom: 5 },
+  contact: { fontSize: 9, color: '#666', lineHeight: 1.3, marginBottom: 4 },
 
   // Sections
   section: { marginTop: 14 },
