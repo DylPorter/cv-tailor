@@ -57,6 +57,17 @@ export function deleteSaved(id: string): void {
   writeSaved(listSaved().filter((s) => s.id !== id))
 }
 
+const GENERATED_KEY = 'cv-tailor:generated'
+
+/** Lifetime count of CVs generated — a dashboard vanity stat. */
+export function getGeneratedCount(): number {
+  return Number(localStorage.getItem(GENERATED_KEY) ?? '0') || 0
+}
+
+export function bumpGenerated(): void {
+  safeSetItem(GENERATED_KEY, String(getGeneratedCount() + 1))
+}
+
 export function getPrefs(): string {
   return localStorage.getItem(PREFS_KEY) ?? ''
 }

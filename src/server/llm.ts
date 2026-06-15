@@ -6,7 +6,17 @@ export interface LLMConfig {
   model: string
 }
 
-export async function callLLM(messages: ChatMessage[], cfg: LLMConfig): Promise<string> {
+export interface CallOptions {
+  /** Force structured JSON output. Default true (the tailor path); merge passes false for prose. */
+  json?: boolean
+}
+
+export async function callLLM(
+  messages: ChatMessage[],
+  cfg: LLMConfig,
+  opts: CallOptions = {},
+): Promise<string> {
+  const { json = true } = opts
   const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -17,7 +27,7 @@ export async function callLLM(messages: ChatMessage[], cfg: LLMConfig): Promise<
       model: cfg.model,
       messages,
       temperature: 0.3,
-      response_format: { type: 'json_object' },
+      ...(json ? { response_format: { type: 'json_object' } } : {}),
     }),
   })
   if (!res.ok) {

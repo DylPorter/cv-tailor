@@ -1,22 +1,56 @@
 import { useState } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { PasswordGate } from './components/PasswordGate'
-import { MasterProfileEditor } from './components/MasterProfileEditor'
-import { TailorPanel } from './components/TailorPanel'
-import { SavedFolder } from './components/SavedFolder'
-import { CVPreview } from './components/CVPreview'
-import { FitReportView } from './components/FitReportView'
-import { getMaster, exportData, importData } from './store/storage'
-import { triggerDownload } from './lib/download'
-import { renderPdf } from './render/pdf'
-import { renderDocx } from './render/docx'
-import type { SavedCV } from './types'
+import { Layout } from './components/Layout'
+import { Dashboard } from './pages/Dashboard'
+import { SavedPage } from './pages/SavedPage'
+import { PasswordContext } from './auth'
+import { getMaster, setMaster } from './store/storage'
+import { Card } from './ui/Card'
+import { Button } from './ui/Button'
+
+function OnboardingPlaceholder() {
+  const navigate = useNavigate()
+  return (
+    <div className="max-w-xl mx-auto text-center">
+      <Card className="p-10">
+        <h1 className="font-display text-3xl text-ink mb-3">Onboarding wizard</h1>
+        <p className="text-ink-soft mb-8 leading-relaxed">
+          The guided setup that builds your universal CV lands in pass 2. For now,
+          drop in a placeholder profile so you can explore the workshop.
+        </p>
+        <Button
+          size="lg"
+          onClick={() => {
+            setMaster('(placeholder)')
+            navigate('/')
+          }}
+        >
+          Use a placeholder profile
+        </Button>
+      </Card>
+    </div>
+  )
+}
+
+function GeneratePlaceholder() {
+  return (
+    <div className="max-w-xl mx-auto text-center">
+      <Card className="p-10">
+        <h1 className="font-display text-3xl text-ink mb-3">Tailor a CV</h1>
+        <p className="text-ink-soft leading-relaxed">
+          The generate flow — paste a job, get a tailored CV and a fit report —
+          arrives in pass 2.
+        </p>
+      </Card>
+    </div>
+  )
+}
 
 export default function App() {
-  const [password, setPassword] = useState<string>(() => sessionStorage.getItem('cv-tailor:pw') ?? '')
-  const [master, setMasterText] = useState<string>(() => getMaster()?.text ?? '')
-  const [opened, setOpened] = useState<SavedCV | null>(null)
-  const [restoreError, setRestoreError] = useState('')
-  const [savedVersion, setSavedVersion] = useState(0)
+  const [password, setPassword] = useState<string>(
+    () => sessionStorage.getItem('cv-tailor:pw') ?? '',
+  )
 
   if (!password) {
     return (
@@ -29,75 +63,25 @@ export default function App() {
     )
   }
 
-  async function onRestore(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setRestoreError('')
-    try {
-      importData(await file.text())
-      window.location.reload()
-    } catch (err) {
-      setRestoreError((err as Error).message)
-    }
-  }
-
-  function backup() {
-    triggerDownload(new Blob([exportData()], { type: 'application/json' }), 'cv-tailor-backup.json')
-  }
-
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">cv-tailor</h1>
-        <div className="flex items-center gap-3 text-sm">
-          <button className="text-slate-600" onClick={backup}>Back up</button>
-          <label className="text-slate-600 cursor-pointer">
-            Restore
-            <input type="file" accept="application/json,.json" className="hidden" onChange={onRestore} />
-          </label>
-          <button
-            className="text-slate-500"
-            onClick={() => {
-              sessionStorage.removeItem('cv-tailor:pw')
-              setPassword('')
-            }}
-          >
-            Lock
-          </button>
-        </div>
-      </header>
-      {restoreError && <p className="text-red-600 text-sm">{restoreError}</p>}
-
-      <section className="border rounded-xl p-5">
-        <MasterProfileEditor onSaved={setMasterText} />
-      </section>
-
-      {master ? (
-        <section className="border rounded-xl p-5">
-          <TailorPanel master={master} password={password} onSaved={() => setSavedVersion((v) => v + 1)} />
-        </section>
-      ) : (
-        <p className="text-slate-500">Save your career history above to start tailoring.</p>
-      )}
-
-      <section className="border rounded-xl p-5 space-y-3">
-        <h2 className="font-semibold">Saved CVs</h2>
-        <SavedFolder key={savedVersion} onOpen={setOpened} />
-        {opened && (
-          <div className="space-y-2 pt-3 border-t">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium">{opened.label}</h3>
-              <button className="text-slate-500 text-sm" onClick={() => setOpened(null)}>Close</button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button className="border rounded px-3 py-1 text-sm" onClick={async () => triggerDownload(await renderPdf(opened.cv), 'CV.pdf')}>Download PDF</button>
-              <button className="border rounded px-3 py-1 text-sm" onClick={async () => triggerDownload(await renderDocx(opened.cv), 'CV.docx')}>Download .docx</button>
-            </div>
-            <FitReportView report={opened.fitReport} />
-            <CVPreview cv={opened.cv} />
-          </div>
-        )}
-      </section>
-    </div>
+    <PasswordContext.Provider value={password}>
+      <Layout
+        onLock={() => {
+          sessionStorage.removeItem('cv-tailor:pw')
+          setPassword('')
+        }}
+      >
+        <Routes>
+          <Route
+            path="/"
+            element={getMaster() ? <Dashboard /> : <Navigate to="/onboarding" replace />}
+          />
+          <Route path="/onboarding" element={<OnboardingPlaceholder />} />
+          <Route path="/generate" element={<GeneratePlaceholder />} />
+          <Route path="/saved" element={<SavedPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
+    </PasswordContext.Provider>
   )
 }

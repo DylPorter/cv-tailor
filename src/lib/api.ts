@@ -21,3 +21,23 @@ export async function requestTailor(req: TailorRequest): Promise<TailorResponse>
   }
   return (await res.json()) as TailorResponse
 }
+
+export interface MergeRequest {
+  password: string
+  cvs: string[]
+}
+
+/** Merge one or more uploaded CVs into a single universal master profile (plain text). */
+export async function requestMerge(req: MergeRequest): Promise<string> {
+  const res = await fetch('/api/merge', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || `Request failed (${res.status})`)
+  }
+  const body = (await res.json()) as { profile: string }
+  return body.profile
+}

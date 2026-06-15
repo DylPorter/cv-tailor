@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+/* ── cv-tailor design system — "editorial stationery" ───────────────────
+   Paper-cream canvas, ink text, a single warm clay accent. Fraunces (display)
+   + Hanken Grotesk (UI). Tokens are exposed as Tailwind v4 theme values so we
+   can write bg-paper, text-ink, font-display, etc. */
+@theme {
+  --color-paper: #f7f1e6;
+  --color-paper-deep: #efe6d5;
+  --color-card: #fffdf8;
+  --color-ink: #211d18;
+  --color-ink-soft: #5c554a;
+  --color-ink-faint: #9b9183;
+  --color-clay: #b4452e;
+  --color-clay-deep: #8f3522;
+  --color-clay-soft: #e8c9bd;
+  --color-sage: #5a6b52;
+  --color-line: #e2d7c4;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    /* faint paper grain via layered radial noise */
+    background-color: var(--color-paper);
+    background-image: radial-gradient(
+        circle at 20% 15%,
+        rgba(180, 69, 46, 0.04),
+        transparent 45%
+      ),
+      radial-gradient(circle at 85% 80%, rgba(90, 107, 82, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* subtle grain overlay utility */
+@layer utilities {
+  .grain::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+}
