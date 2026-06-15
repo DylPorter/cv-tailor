@@ -28,27 +28,22 @@ export function ExportModal({ open, onClose }: { open: boolean; onClose: () => v
   return (
     <Modal open={open} onClose={onClose} title="Export your CVs">
       <p className="text-ink-soft leading-relaxed mb-6">
-        Save your universal profile and{' '}
+        Export your universal profile and your{' '}
         <span className="text-ink font-medium">
-          {summary.count} tailored {summary.count === 1 ? 'CV' : 'CVs'}
+          {summary.count} saved {summary.count === 1 ? 'CV' : 'CVs'}
         </span>{' '}
-        as a single folder you can keep, back up, or move to another device.
+        as a single folder you can keep or move to another device.
       </p>
 
       <div className="rounded-xl border border-line bg-paper p-5 mb-6">
         <p className="text-xs font-medium tracking-wide uppercase text-ink-faint mb-3">
-          What you&apos;ll get
+          What&apos;s inside
         </p>
-        <pre className="font-sans text-[13px] leading-relaxed text-ink-soft whitespace-pre overflow-x-auto">
-{`cv-tailor-export.zip
-├── Universal Profile.txt
-├── cv-tailor-data.json      (for re-loading later)
-└── Tailored CVs/
-    └── ${summary.fields[0] ?? 'General'}/
-        └── …/
-            ├── CV.pdf
-            └── CV.docx`}
-        </pre>
+        <ul className="space-y-1.5 text-[13px] leading-relaxed text-ink-soft">
+          <li>• Your tailored CVs as PDF + Word, sorted by field</li>
+          <li>• Your master profile</li>
+          <li>• A backup file to reload everything later</li>
+        </ul>
       </div>
 
       {error && (

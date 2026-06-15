@@ -42,8 +42,13 @@ describe('zipExport', () => {
     expect(zip.file('Universal Profile.txt')).not.toBeNull()
     expect(await zip.file('Universal Profile.txt')!.async('string')).toBe('my universal history')
 
-    expect(zip.file('Tailored CVs/Academic/Uni — Lecturer/CV.pdf')).not.toBeNull()
-    expect(zip.file('Tailored CVs/Academic/Uni — Lecturer/CV.docx')).not.toBeNull()
-    expect(zip.file('Tailored CVs/General/Acme — Ops/CV.pdf')).not.toBeNull()
+    // Flat: {Field}/{Name}_Resume_{Role}.{ext}, no wrapper or per-CV subfolder.
+    expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.pdf')).not.toBeNull()
+    expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.docx')).not.toBeNull()
+    expect(zip.file('General/Alan_Porter_Resume_Acme_Ops.pdf')).not.toBeNull()
+    expect(zip.file('General/Alan_Porter_Resume_Acme_Ops.docx')).not.toBeNull()
+
+    // No legacy wrapper folder.
+    expect(zip.file(/^Tailored CVs\//)).toHaveLength(0)
   })
 })

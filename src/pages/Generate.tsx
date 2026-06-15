@@ -11,6 +11,7 @@ import { getMaster, getPrefs, saveCV, bumpGenerated } from '../store/storage'
 import { renderPdf } from '../render/pdf'
 import { renderDocx } from '../render/docx'
 import { triggerDownload } from '../lib/download'
+import { resumeFilename } from '../lib/filename'
 import type { CVJson, FitReport } from '../types'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -313,13 +314,17 @@ function ResultView({
           <h3 className="font-display text-lg text-ink mb-3">Download</h3>
           <div className="flex flex-wrap gap-2">
             <Button
-              onClick={async () => triggerDownload(await renderPdf(cv), 'CV.pdf')}
+              onClick={async () =>
+                triggerDownload(await renderPdf(cv), resumeFilename(cv.name, saveLabel || defaultLabel, 'pdf'))
+              }
             >
               PDF
             </Button>
             <Button
               variant="outline"
-              onClick={async () => triggerDownload(await renderDocx(cv), 'CV.docx')}
+              onClick={async () =>
+                triggerDownload(await renderDocx(cv), resumeFilename(cv.name, saveLabel || defaultLabel, 'docx'))
+              }
             >
               .docx
             </Button>

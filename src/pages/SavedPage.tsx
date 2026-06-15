@@ -8,6 +8,7 @@ import { CVPreview } from '../components/CVPreview'
 import { FitReportView } from '../components/FitReportView'
 import { listSaved, deleteSaved } from '../store/storage'
 import { triggerDownload } from '../lib/download'
+import { resumeFilename } from '../lib/filename'
 import { renderPdf } from '../render/pdf'
 import { renderDocx } from '../render/docx'
 import type { SavedCV } from '../types'
@@ -33,11 +34,13 @@ export function SavedPage() {
   const navigate = useNavigate()
   const [items, setItems] = useState<SavedCV[]>(() => listSaved())
   const [opened, setOpened] = useState<SavedCV | null>(null)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   function remove(id: string) {
     deleteSaved(id)
     setItems(listSaved())
     setOpened((cur) => (cur?.id === id ? null : cur))
+    setConfirmingId(null)
   }
 
   if (items.length === 0) {
@@ -81,27 +84,47 @@ export function SavedPage() {
                 </h2>
                 <p className="text-sm text-ink-faint">{formatDate(cv.createdAt)}</p>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap items-center gap-2">
                 <Button onClick={() => setOpened(cv)}>Open</Button>
                 <Button
                   variant="outline"
-                  onClick={async () => triggerDownload(await renderPdf(cv.cv), 'CV.pdf')}
+                  onClick={async () =>
+                    triggerDownload(await renderPdf(cv.cv), resumeFilename(cv.cv.name, cv.label, 'pdf'))
+                  }
                 >
                   PDF
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={async () => triggerDownload(await renderDocx(cv.cv), 'CV.docx')}
+                  onClick={async () =>
+                    triggerDownload(await renderDocx(cv.cv), resumeFilename(cv.cv.name, cv.label, 'docx'))
+                  }
                 >
                   .docx
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="text-clay hover:text-clay-deep ml-auto"
-                  onClick={() => remove(cv.id)}
-                >
-                  Delete
-                </Button>
+                {confirmingId === cv.id ? (
+                  <span className="ml-auto inline-flex items-center gap-2">
+                    <span className="text-sm text-ink-soft">Delete?</span>
+                    <Button
+                      variant="ghost"
+                      className="text-clay hover:text-clay-deep"
+                      onClick={() => remove(cv.id)}
+                    >
+                      Yes
+                    </Button>
+                    <Button variant="ghost" onClick={() => setConfirmingId(null)}>
+                      Cancel
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="text-clay hover:text-clay-deep ml-auto"
+                    onClick={() => setConfirmingId(cv.id)}
+                  >
+                    Delete
+                  </Button>
+                )}
               </div>
             </Card>
           </motion.div>
@@ -113,13 +136,17 @@ export function SavedPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={async () => triggerDownload(await renderPdf(opened.cv), 'CV.pdf')}
+                onClick={async () =>
+                  triggerDownload(await renderPdf(opened.cv), resumeFilename(opened.cv.name, opened.label, 'pdf'))
+                }
               >
                 Download PDF
               </Button>
               <Button
                 variant="outline"
-                onClick={async () => triggerDownload(await renderDocx(opened.cv), 'CV.docx')}
+                onClick={async () =>
+                  triggerDownload(await renderDocx(opened.cv), resumeFilename(opened.cv.name, opened.label, 'docx'))
+                }
               >
                 Download .docx
               </Button>

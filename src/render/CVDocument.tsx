@@ -3,38 +3,77 @@ import type { CVJson } from '../types'
 import { groupExperienceByOrg } from './groupExperience'
 
 const s = StyleSheet.create({
-  page: { padding: 40, fontSize: 10, fontFamily: 'Helvetica', color: '#111', lineHeight: 1.4 },
-  name: { fontSize: 20, fontFamily: 'Helvetica-Bold', marginBottom: 2 },
-  contact: { fontSize: 9, color: '#444', marginBottom: 10 },
-  section: { marginTop: 12 },
-  sectionTitle: { fontSize: 11, fontFamily: 'Helvetica-Bold', borderBottom: '1 solid #999', paddingBottom: 2, marginBottom: 4, textTransform: 'uppercase' },
-  summary: { marginBottom: 2 },
-  jobHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  jobTitle: { fontFamily: 'Helvetica-Bold' },
-  jobDates: { color: '#444' },
-  jobOrg: { fontStyle: 'italic', marginBottom: 2 },
-  bullet: { flexDirection: 'row', marginBottom: 1 },
-  bulletDot: { width: 10 },
-  bulletText: { flex: 1 },
-  entry: { marginBottom: 6 },
-  orgName: { fontFamily: 'Helvetica-Bold', marginBottom: 2 },
-  roleTitle: { fontStyle: 'italic' },
-  rolesMulti: { borderLeft: '1 solid #ccc', paddingLeft: 8 },
-  role: { marginBottom: 4 },
-  skills: { },
+  page: {
+    paddingVertical: 40,
+    paddingHorizontal: 44,
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#1a1a1a',
+    lineHeight: 1.45,
+  },
+
+  // Header
+  name: { fontSize: 21, fontFamily: 'Helvetica-Bold', marginBottom: 3 },
+  contact: { fontSize: 9, color: '#555', marginBottom: 4 },
+
+  // Sections
+  section: { marginTop: 14 },
+  sectionTitle: {
+    fontSize: 10.5,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: '#1a1a1a',
+    borderBottom: '1pt solid #bbb',
+    paddingBottom: 3,
+    marginBottom: 7,
+  },
+
+  summary: { color: '#333' },
+
+  // Employer groups
+  group: { marginBottom: 9 },
+  orgName: { fontSize: 11, fontFamily: 'Helvetica-Bold', marginBottom: 1 },
+  roleBlock: { marginTop: 3 },
+  roleBlockIndented: { marginTop: 3, paddingLeft: 12 },
+  roleHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+  roleTitle: { fontFamily: 'Helvetica-Bold', fontSize: 10, color: '#222' },
+  roleDates: { fontSize: 9, color: '#666' },
+
+  // Bullets with hanging indent
+  bullet: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 2 },
+  bulletDot: { width: 11 },
+  bulletText: { flex: 1, color: '#333' },
+
+  // Education
+  eduEntry: { marginBottom: 6 },
+  eduHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 },
+  eduCredential: { fontFamily: 'Helvetica-Bold', fontSize: 10, color: '#222' },
+  eduDates: { fontSize: 9, color: '#666' },
+  eduInstitution: { fontSize: 9.5, color: '#555' },
+
+  // Skills / extras
+  inlineList: { color: '#333' },
 })
 
-// Single column, no graphics, real text → ATS-safe.
+// Single column, top-to-bottom reading order, real text runs only — no images,
+// icons, tables, or multi-column layout. Section underlines are 1pt borders
+// (lines, not graphics). This keeps the output ATS-parseable.
 export function CVDocument({ cv }: { cv: CVJson }) {
   const contactLine = [cv.contact.location, cv.contact.email, cv.contact.phone, ...(cv.contact.links ?? [])]
     .filter(Boolean)
-    .join('  •  ')
+    .join('   •   ')
+
+  const groups = groupExperienceByOrg(cv.experience)
+
   return (
     <Document>
       <Page size="A4" style={s.page}>
+        {/* Header */}
         <Text style={s.name}>{cv.name}</Text>
-        <Text style={s.contact}>{contactLine}</Text>
+        {contactLine ? <Text style={s.contact}>{contactLine}</Text> : null}
 
+        {/* Summary */}
         {cv.summary ? (
           <View style={s.section}>
             <Text style={s.sectionTitle}>Summary</Text>
@@ -42,19 +81,20 @@ export function CVDocument({ cv }: { cv: CVJson }) {
           </View>
         ) : null}
 
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>Experience</Text>
-          {groupExperienceByOrg(cv.experience).map((group, i) => {
-            const multi = group.roles.length > 1
-            return (
-              <View key={i} style={s.entry}>
-                <Text style={s.orgName}>{group.org}</Text>
-                <View style={multi ? s.rolesMulti : undefined}>
+        {/* Experience — employer-grouped */}
+        {groups.length ? (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Experience</Text>
+            {groups.map((group, i) => {
+              const multi = group.roles.length > 1
+              return (
+                <View key={i} style={s.group} wrap={false}>
+                  <Text style={s.orgName}>{group.org}</Text>
                   {group.roles.map((r, j) => (
-                    <View key={j} style={multi ? s.role : undefined}>
-                      <View style={s.jobHeader}>
+                    <View key={j} style={multi ? s.roleBlockIndented : s.roleBlock}>
+                      <View style={s.roleHeader}>
                         <Text style={s.roleTitle}>{r.title}</Text>
-                        <Text style={s.jobDates}>{r.dates}</Text>
+                        {r.dates ? <Text style={s.roleDates}>{r.dates}</Text> : null}
                       </View>
                       {r.bullets.map((b, k) => (
                         <View key={k} style={s.bullet}>
@@ -65,33 +105,40 @@ export function CVDocument({ cv }: { cv: CVJson }) {
                     </View>
                   ))}
                 </View>
+              )
+            })}
+          </View>
+        ) : null}
+
+        {/* Education */}
+        {cv.education.length ? (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Education</Text>
+            {cv.education.map((ed, i) => (
+              <View key={i} style={s.eduEntry} wrap={false}>
+                <View style={s.eduHeader}>
+                  <Text style={s.eduCredential}>{ed.credential}</Text>
+                  {ed.dates ? <Text style={s.eduDates}>{ed.dates}</Text> : null}
+                </View>
+                <Text style={s.eduInstitution}>{ed.institution}</Text>
               </View>
-            )
-          })}
-        </View>
+            ))}
+          </View>
+        ) : null}
 
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>Education</Text>
-          {cv.education.map((ed, i) => (
-            <View key={i} style={s.entry}>
-              <View style={s.jobHeader}>
-                <Text style={s.jobTitle}>{ed.credential}</Text>
-                <Text style={s.jobDates}>{ed.dates}</Text>
-              </View>
-              <Text style={s.jobOrg}>{ed.institution}</Text>
-            </View>
-          ))}
-        </View>
+        {/* Skills */}
+        {cv.skills.length ? (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Skills</Text>
+            <Text style={s.inlineList}>{cv.skills.join('   •   ')}</Text>
+          </View>
+        ) : null}
 
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>Skills</Text>
-          <Text style={s.skills}>{cv.skills.join('  •  ')}</Text>
-        </View>
-
+        {/* Extras */}
         {(cv.extras ?? []).map((ex, i) => (
           <View key={i} style={s.section}>
             <Text style={s.sectionTitle}>{ex.heading}</Text>
-            <Text>{ex.items.join('  •  ')}</Text>
+            <Text style={s.inlineList}>{ex.items.join('   •   ')}</Text>
           </View>
         ))}
       </Page>
