@@ -1,4 +1,18 @@
+<div align="center">
+
 # cv-tailor
+
+**Rewrite your CV to fit a specific job — a clean PDF and an editable Word file out, plus an honest report on how well you actually match the role.**
+
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38BDF8?logo=tailwindcss&logoColor=white)
+
+<img src="docs/screenshots/cvt-04-result.png" alt="A tailored CV and its fit report shown side by side" width="840">
+
+</div>
 
 A small web app that rewrites your CV to fit a specific job. Paste your full career history once, paste a job description, and it gives you back a tailored one-to-two page CV as both a PDF and an editable Word file, plus a short report on how well you actually match the role.
 
@@ -13,6 +27,13 @@ I built this for my dad. He'd been in the same organisation for about 20 years a
 - **Refine loop.** "Make it shorter", "lean more academic", and it regenerates.
 - **Standing preferences.** A notes field that rides along every time, so the output stays consistent without you repeating yourself.
 
+## Screenshots
+
+|  |  |
+| --- | --- |
+| <img src="docs/screenshots/cvt-02-dashboard.png" alt="Dashboard" width="430"><br>**One universal profile.** Your master CV, how many you've generated, and everything you've saved, all on one page. | <img src="docs/screenshots/cvt-03-input.png" alt="Paste a job description" width="430"><br>**Paste a job.** Drop in the job description and it shapes a CV to fit, then shows you the fit report. |
+| <img src="docs/screenshots/cvt-05-saved.png" alt="Saved CVs" width="430"><br>**Saved locally.** Every tailored CV is kept in your browser, ready to re-download as a PDF or `.docx`. | <img src="docs/screenshots/cvt-01-gate.png" alt="Password gate" width="430"><br>**Behind a shared password** so the model can't be called — and your API key can't be burned — by random visitors. |
+
 ## What it won't do
 
 It won't make things up. It only ever works from what's in your master profile, so it can't add experience you don't have. It's a presentation tool, not a fiction generator. It also doesn't scrape JobsDB or LinkedIn for you. You copy the job description in by hand, which is slower but keeps you off the wrong side of their rate limits.
@@ -23,15 +44,13 @@ Everything you enter lives in your own browser (`localStorage`). There's no data
 
 ## Self-hosting
 
-It runs on any host with serverless functions (built and deployed on Vercel, ports to Cloudflare Pages). The model is any OpenAI-compatible endpoint, so you bring your own key.
+It runs anywhere that serves a static site plus serverless functions. It's built and deployed on Vercel, and the model is any OpenAI-compatible endpoint, so you bring your own key. Local setup is just three commands and no Vercel CLI — a small dev plugin serves the `api/*` functions alongside Vite, so the whole app runs from `npm run dev`.
 
 ```bash
 npm install
 cp .env.example .env.local   # fill in the four values below
-vercel dev                   # runs the UI + the /api/tailor function together
+npm run dev                  # UI + the /api functions, on http://localhost:5173
 ```
-
-`npm run dev` serves the frontend but not the serverless function, so `/api/tailor` will 404 — use `vercel dev` for full local testing.
 
 Four environment variables:
 
@@ -43,6 +62,8 @@ Four environment variables:
 | `APP_PASSWORD` | a shared password people type before the tool will call the model, so your key can't be abused |
 
 DeepSeek, OpenAI, and Gemini all expose OpenAI-compatible endpoints, so swapping provider is a config change, not a code change. See `.env.example` for the exact base URLs.
+
+To deploy, push to Vercel (or any host with serverless functions; it ports to Cloudflare Pages) with the same four environment variables set in the project.
 
 ## Stack
 
