@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { PasswordGate } from './components/PasswordGate'
 import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
@@ -13,6 +13,11 @@ export default function App() {
   const [password, setPassword] = useState<string>(
     () => sessionStorage.getItem('cv-tailor:pw') ?? '',
   )
+
+  // Frozen per-render location so AnimatePresence's exiting page keeps its old
+  // route content during the transition (otherwise the new page flashes in,
+  // then animates). The exit copy retains this render's <Routes location>.
+  const location = useLocation()
 
   if (!password) {
     return (
@@ -33,7 +38,7 @@ export default function App() {
           setPassword('')
         }}
       >
-        <Routes>
+        <Routes location={location}>
           <Route
             path="/"
             element={getMaster() ? <Dashboard /> : <Navigate to="/onboarding" replace />}
