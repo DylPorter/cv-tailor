@@ -5,3 +5,6 @@ dist/
 *.local
 .vercel
 .DS_Store
+
+# Eyeball artifacts (not committed)
+sample-output/
