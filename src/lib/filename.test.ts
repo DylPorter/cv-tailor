@@ -3,19 +3,19 @@ import { resumeFilename } from './filename'
 
 describe('resumeFilename', () => {
   it('builds name + role + ext', () => {
-    expect(resumeFilename('Taliesin Porter', 'Operations Manager', 'pdf')).toBe(
-      'Taliesin_Porter_Resume_Operations_Manager.pdf',
+    expect(resumeFilename('Jane Doe', 'Operations Manager', 'pdf')).toBe(
+      'Jane_Doe_Resume_Operations_Manager.pdf',
     )
   })
 
   it('omits role when empty', () => {
-    expect(resumeFilename('Taliesin Porter', '', 'pdf')).toBe('Taliesin_Porter_Resume.pdf')
-    expect(resumeFilename('Taliesin Porter', '   ', 'docx')).toBe('Taliesin_Porter_Resume.docx')
+    expect(resumeFilename('Jane Doe', '', 'pdf')).toBe('Jane_Doe_Resume.pdf')
+    expect(resumeFilename('Jane Doe', '   ', 'docx')).toBe('Jane_Doe_Resume.docx')
   })
 
   it('sanitizes messy characters', () => {
-    expect(resumeFilename('Taliesin  Porter!', 'Acme — Ops (Sr.)', 'docx')).toBe(
-      'Taliesin_Porter_Resume_Acme_Ops_Sr.docx',
+    expect(resumeFilename('Jane  Doe!', 'Acme — Ops (Sr.)', 'docx')).toBe(
+      'Jane_Doe_Resume_Acme_Ops_Sr.docx',
     )
   })
 
