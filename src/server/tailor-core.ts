@@ -1,6 +1,6 @@
-import { buildMessages, type ChatMessage } from './prompt'
+import { buildMessages, type ChatMessage } from './prompt.js'
 import type { LLMConfig } from './llm'
-import { validateTailorResponse } from '../schema'
+import { validateTailorResponse } from '../schema.js'
 import type { CVJson, TailorResponse } from '../types'
 
 export interface TailorInput {

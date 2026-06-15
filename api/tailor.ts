@@ -1,5 +1,5 @@
-import { tailor, type TailorInput } from '../src/server/tailor-core'
-import { callLLM } from '../src/server/llm'
+import { tailor, type TailorInput } from '../src/server/tailor-core.js'
+import { callLLM } from '../src/server/llm.js'
 
 export const config = { runtime: 'nodejs' }
 

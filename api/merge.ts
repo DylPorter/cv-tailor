@@ -1,5 +1,5 @@
-import { mergeProfiles, type MergeInput } from '../src/server/merge-core'
-import { callLLM } from '../src/server/llm'
+import { mergeProfiles, type MergeInput } from '../src/server/merge-core.js'
+import { callLLM } from '../src/server/llm.js'
 
 export const config = { runtime: 'nodejs' }
 
