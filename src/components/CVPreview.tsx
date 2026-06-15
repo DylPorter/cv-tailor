@@ -1,4 +1,5 @@
 import type { CVJson } from '../types'
+import { groupExperienceByOrg } from '../render/groupExperience'
 
 export function CVPreview({ cv }: { cv: CVJson }) {
   const contact = [cv.contact.location, cv.contact.email, cv.contact.phone, ...(cv.contact.links ?? [])]
@@ -18,20 +19,29 @@ export function CVPreview({ cv }: { cv: CVJson }) {
 
       <section className="mb-5">
         <h2 className="uppercase text-xs font-semibold tracking-wider text-clay border-b border-line pb-1 mb-3">Experience</h2>
-        {cv.experience.map((job, i) => (
-          <div key={i} className="mb-4">
-            <div className="flex justify-between font-semibold text-ink">
-              <span>{job.title}</span>
-              <span className="text-ink-faint font-normal">{job.dates}</span>
+        {groupExperienceByOrg(cv.experience).map((group, i) => {
+          const multi = group.roles.length > 1
+          return (
+            <div key={i} className="mb-4">
+              <p className="font-semibold text-ink">{group.org}</p>
+              <div className={multi ? 'border-l border-line pl-3 mt-1 space-y-2.5' : 'mt-0.5'}>
+                {group.roles.map((r, j) => (
+                  <div key={j}>
+                    <div className="flex justify-between text-ink">
+                      <span className="italic text-ink-soft">{r.title}</span>
+                      <span className="text-ink-faint">{r.dates}</span>
+                    </div>
+                    <ul className="list-disc ml-5 mt-1 text-ink-soft marker:text-clay-soft">
+                      {r.bullets.map((b, k) => (
+                        <li key={k}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="italic text-ink-soft">{job.org}</p>
-            <ul className="list-disc ml-5 mt-1 text-ink-soft marker:text-clay-soft">
-              {job.bullets.map((b, j) => (
-                <li key={j}>{b}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          )
+        })}
       </section>
 
       <section className="mb-5">

@@ -280,9 +280,10 @@ function ResultView({
       })
       onUpdate(res.cv, res.fitReport)
       setSaved(false)
+      const note = res.note?.trim()
       setMessages((cur) => [
         ...cur,
-        { id: newId(), role: 'assistant', text: "Done — I’ve updated it." },
+        { id: newId(), role: 'assistant', text: note || 'Done — I’ve updated it.' },
       ])
     } catch (err) {
       setMessages((cur) => [

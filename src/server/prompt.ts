@@ -68,6 +68,8 @@ This is a PRESENTATION tool. You only SELECT, REORDER, REFRAME, and RE-WORD cont
 # PREFERENCES & REFINEMENT
 Honour the candidate's standing preferences when provided (e.g. spelling, tone, must-keep items), unless the job description directly conflicts. If a refinement instruction and prior CV are provided, treat the prior CV as the base and apply the instruction precisely while keeping all rules above.
 
+When a REFINEMENT INSTRUCTION and PREVIOUS TAILORED CV are provided, set the top-level "note" field to ONE first-person sentence stating what you actually changed (e.g. "I shortened the summary and cut two older roles."). If the instruction cannot be honoured from the master — e.g. the candidate's entire history is at a single employer and they ask to diversify it — set "note" to an honest one-sentence explanation of why, and still return the best CV you can (you may say you grouped or reframed instead). On initial (non-refinement) generation, "note" may be omitted.
+
 # FIT REPORT
 Populate fitReport honestly: list the job's key requirements with whether the CV covers them (and brief evidence), real gaps the candidate has, and the keywords you mirrored. Do not mark a requirement covered without genuine support in the master.
 
@@ -87,7 +89,8 @@ Output STRICT JSON only, matching EXACTLY this shape (do not rename fields, do n
     "requirements": [{ "requirement": string, "covered": boolean, "evidence"?: string }],
     "gaps": string[],
     "keywordsMirrored": string[]
-  }
+  },
+  "note"?: string
 }
 Use "extras" sparingly and only for genuinely relevant items (e.g. languages, key certifications) — never as a dumping ground. Do not include any prose, markdown, or code fences outside the JSON object.`
 

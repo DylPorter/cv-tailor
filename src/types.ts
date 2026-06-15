@@ -49,6 +49,7 @@ export interface FitReport {
 export interface TailorResponse {
   cv: CVJson
   fitReport: FitReport
+  note?: string
 }
 
 export interface MasterProfile {

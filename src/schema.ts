@@ -46,6 +46,7 @@ const fitReportSchema = z.object({
 const tailorResponseSchema = z.object({
   cv: cvSchema,
   fitReport: fitReportSchema,
+  note: z.string().optional(),
 })
 
 export type ValidationResult =

@@ -1,5 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx'
 import type { CVJson } from '../types'
+import { groupExperienceByOrg } from './groupExperience'
 
 function sectionTitle(text: string): Paragraph {
   return new Paragraph({
@@ -29,18 +30,21 @@ export async function renderDocx(cv: CVJson): Promise<Blob> {
   }
 
   children.push(sectionTitle('Experience'))
-  for (const job of cv.experience) {
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({ text: job.title, bold: true }),
-          new TextRun({ text: `\t${job.dates}`, color: '444444' }),
-        ],
-        tabStops: [{ type: AlignmentType.RIGHT, position: 9000 }],
-      }),
-    )
-    children.push(new Paragraph({ children: [new TextRun({ text: job.org, italics: true })] }))
-    for (const b of job.bullets) children.push(bullet(b))
+  for (const group of groupExperienceByOrg(cv.experience)) {
+    // Company name once.
+    children.push(new Paragraph({ children: [new TextRun({ text: group.org, bold: true })] }))
+    for (const r of group.roles) {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: r.title, italics: true }),
+            new TextRun({ text: `\t${r.dates}`, color: '444444' }),
+          ],
+          tabStops: [{ type: AlignmentType.RIGHT, position: 9000 }],
+        }),
+      )
+      for (const b of r.bullets) children.push(bullet(b))
+    }
   }
 
   children.push(sectionTitle('Education'))

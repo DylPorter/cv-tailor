@@ -1,5 +1,6 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import type { CVJson } from '../types'
+import { groupExperienceByOrg } from './groupExperience'
 
 const s = StyleSheet.create({
   page: { padding: 40, fontSize: 10, fontFamily: 'Helvetica', color: '#111', lineHeight: 1.4 },
@@ -16,6 +17,10 @@ const s = StyleSheet.create({
   bulletDot: { width: 10 },
   bulletText: { flex: 1 },
   entry: { marginBottom: 6 },
+  orgName: { fontFamily: 'Helvetica-Bold', marginBottom: 2 },
+  roleTitle: { fontStyle: 'italic' },
+  rolesMulti: { borderLeft: '1 solid #ccc', paddingLeft: 8 },
+  role: { marginBottom: 4 },
   skills: { },
 })
 
@@ -39,21 +44,30 @@ export function CVDocument({ cv }: { cv: CVJson }) {
 
         <View style={s.section}>
           <Text style={s.sectionTitle}>Experience</Text>
-          {cv.experience.map((job, i) => (
-            <View key={i} style={s.entry}>
-              <View style={s.jobHeader}>
-                <Text style={s.jobTitle}>{job.title}</Text>
-                <Text style={s.jobDates}>{job.dates}</Text>
-              </View>
-              <Text style={s.jobOrg}>{job.org}</Text>
-              {job.bullets.map((b, j) => (
-                <View key={j} style={s.bullet}>
-                  <Text style={s.bulletDot}>•</Text>
-                  <Text style={s.bulletText}>{b}</Text>
+          {groupExperienceByOrg(cv.experience).map((group, i) => {
+            const multi = group.roles.length > 1
+            return (
+              <View key={i} style={s.entry}>
+                <Text style={s.orgName}>{group.org}</Text>
+                <View style={multi ? s.rolesMulti : undefined}>
+                  {group.roles.map((r, j) => (
+                    <View key={j} style={multi ? s.role : undefined}>
+                      <View style={s.jobHeader}>
+                        <Text style={s.roleTitle}>{r.title}</Text>
+                        <Text style={s.jobDates}>{r.dates}</Text>
+                      </View>
+                      {r.bullets.map((b, k) => (
+                        <View key={k} style={s.bullet}>
+                          <Text style={s.bulletDot}>•</Text>
+                          <Text style={s.bulletText}>{b}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          ))}
+              </View>
+            )
+          })}
         </View>
 
         <View style={s.section}>
