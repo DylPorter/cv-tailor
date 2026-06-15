@@ -24,9 +24,14 @@ export function MasterProfileEditor({ onSaved }: { onSaved: (text: string) => vo
 
   function save() {
     if (!text.trim()) return
-    setMaster(text)
-    setPrefs(prefs)
-    onSaved(text)
+    try {
+      setMaster(text)
+      setPrefs(prefs)
+      setError('')
+      onSaved(text)
+    } catch (err) {
+      setError((err as Error).message)
+    }
   }
 
   return (

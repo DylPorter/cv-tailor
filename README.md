@@ -28,8 +28,10 @@ It runs on any host with serverless functions (built and deployed on Vercel, por
 ```bash
 npm install
 cp .env.example .env.local   # fill in the four values below
-npm run dev
+vercel dev                   # runs the UI + the /api/tailor function together
 ```
+
+`npm run dev` serves the frontend but not the serverless function, so `/api/tailor` will 404 — use `vercel dev` for full local testing.
 
 Four environment variables:
 

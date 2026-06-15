@@ -8,7 +8,7 @@ import { saveCV, getPrefs } from '../store/storage'
 import { CVPreview } from './CVPreview'
 import { FitReportView } from './FitReportView'
 
-export function TailorPanel({ master, password }: { master: string; password: string }) {
+export function TailorPanel({ master, password, onSaved }: { master: string; password: string; onSaved?: () => void }) {
   const [jd, setJd] = useState('')
   const [label, setLabel] = useState('')
   const [result, setResult] = useState<TailorResponse | null>(null)
@@ -39,7 +39,13 @@ export function TailorPanel({ master, password }: { master: string; password: st
 
   function save() {
     if (!result) return
-    saveCV({ label: label || 'Untitled role', jd, cv: result.cv, fitReport: result.fitReport })
+    try {
+      saveCV({ label: label || 'Untitled role', jd, cv: result.cv, fitReport: result.fitReport })
+      setError('')
+      onSaved?.()
+    } catch (e) {
+      setError((e as Error).message)
+    }
   }
 
   return (

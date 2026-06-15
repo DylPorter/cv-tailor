@@ -16,6 +16,7 @@ export default function App() {
   const [master, setMasterText] = useState<string>(() => getMaster()?.text ?? '')
   const [opened, setOpened] = useState<SavedCV | null>(null)
   const [restoreError, setRestoreError] = useState('')
+  const [savedVersion, setSavedVersion] = useState(0)
 
   if (!password) {
     return (
@@ -73,7 +74,7 @@ export default function App() {
 
       {master ? (
         <section className="border rounded-xl p-5">
-          <TailorPanel master={master} password={password} />
+          <TailorPanel master={master} password={password} onSaved={() => setSavedVersion((v) => v + 1)} />
         </section>
       ) : (
         <p className="text-slate-500">Save your career history above to start tailoring.</p>
@@ -81,7 +82,7 @@ export default function App() {
 
       <section className="border rounded-xl p-5 space-y-3">
         <h2 className="font-semibold">Saved CVs</h2>
-        <SavedFolder onOpen={setOpened} />
+        <SavedFolder key={savedVersion} onOpen={setOpened} />
         {opened && (
           <div className="space-y-2 pt-3 border-t">
             <div className="flex items-center justify-between">

@@ -4,6 +4,19 @@ const MASTER_KEY = 'cv-tailor:master'
 const SAVED_KEY = 'cv-tailor:saved'
 const PREFS_KEY = 'cv-tailor:prefs'
 
+// Wrap every write so a full localStorage surfaces a friendly, catchable error
+// instead of a raw QuotaExceededError. Callers show err.message in their UI.
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value)
+  } catch (e) {
+    if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22)) {
+      throw new Error('Browser storage is full. Delete some saved CVs and try again.')
+    }
+    throw e
+  }
+}
+
 export function getMaster(): MasterProfile | null {
   const raw = localStorage.getItem(MASTER_KEY)
   return raw ? (JSON.parse(raw) as MasterProfile) : null
@@ -11,7 +24,7 @@ export function getMaster(): MasterProfile | null {
 
 export function setMaster(text: string): MasterProfile {
   const profile: MasterProfile = { text, updatedAt: new Date().toISOString() }
-  localStorage.setItem(MASTER_KEY, JSON.stringify(profile))
+  safeSetItem(MASTER_KEY, JSON.stringify(profile))
   return profile
 }
 
@@ -21,7 +34,7 @@ export function listSaved(): SavedCV[] {
 }
 
 function writeSaved(items: SavedCV[]): void {
-  localStorage.setItem(SAVED_KEY, JSON.stringify(items))
+  safeSetItem(SAVED_KEY, JSON.stringify(items))
 }
 
 function newId(): string {
@@ -49,7 +62,7 @@ export function getPrefs(): string {
 }
 
 export function setPrefs(text: string): void {
-  localStorage.setItem(PREFS_KEY, text)
+  safeSetItem(PREFS_KEY, text)
 }
 
 interface BackupShape {
@@ -65,11 +78,16 @@ export function exportData(): string {
 }
 
 export function importData(json: string): void {
-  const parsed = JSON.parse(json) as BackupShape
+  let parsed: BackupShape
+  try {
+    parsed = JSON.parse(json) as BackupShape
+  } catch {
+    throw new Error('That file is not a valid cv-tailor backup.')
+  }
   if (typeof parsed !== 'object' || parsed === null || !Array.isArray(parsed.saved)) {
     throw new Error('That file is not a valid cv-tailor backup.')
   }
-  if (parsed.master) localStorage.setItem(MASTER_KEY, JSON.stringify(parsed.master))
+  if (parsed.master) safeSetItem(MASTER_KEY, JSON.stringify(parsed.master))
   writeSaved(parsed.saved)
-  if (typeof parsed.prefs === 'string') localStorage.setItem(PREFS_KEY, parsed.prefs)
+  if (typeof parsed.prefs === 'string') safeSetItem(PREFS_KEY, parsed.prefs)
 }

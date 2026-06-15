@@ -18,7 +18,13 @@ export default async function handler(req: any, res: any) {
     res.status(500).json({ error: 'Server is not configured.' })
     return
   }
-  const body: TailorInput = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+  let body: TailorInput
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+  } catch {
+    res.status(400).json({ error: 'Invalid request body.' })
+    return
+  }
   const result = await tailor(body, {
     callLLM,
     config: { baseUrl: LLM_BASE_URL, apiKey: LLM_API_KEY, model: LLM_MODEL },
