@@ -13,8 +13,8 @@ const s = StyleSheet.create({
   },
 
   // Header
-  name: { fontSize: 21, fontFamily: 'Helvetica-Bold', marginBottom: 3 },
-  contact: { fontSize: 9, color: '#555', marginBottom: 4 },
+  name: { fontSize: 22, fontFamily: 'Helvetica-Bold', marginBottom: 6 },
+  contact: { fontSize: 9, color: '#666', lineHeight: 1.3, marginBottom: 2 },
 
   // Sections
   section: { marginTop: 14 },
@@ -69,13 +69,17 @@ export function CVDocument({ cv }: { cv: CVJson }) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
-        {/* Header */}
-        <Text style={s.name}>{cv.name}</Text>
-        {contactLine ? <Text style={s.contact}>{contactLine}</Text> : null}
+        {/* Header — name on its own line (no wrap), contact line muted below */}
+        <View wrap={false}>
+          <Text style={s.name} wrap={false}>
+            {cv.name}
+          </Text>
+          {contactLine ? <Text style={s.contact}>{contactLine}</Text> : null}
+        </View>
 
-        {/* Summary */}
+        {/* Summary — keep heading with its body */}
         {cv.summary ? (
-          <View style={s.section}>
+          <View style={s.section} wrap={false}>
             <Text style={s.sectionTitle}>Summary</Text>
             <Text style={s.summary}>{cv.summary}</Text>
           </View>
@@ -84,26 +88,38 @@ export function CVDocument({ cv }: { cv: CVJson }) {
         {/* Experience — employer-grouped */}
         {groups.length ? (
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Experience</Text>
+            {/* Keep the section heading with the first employer's first role. */}
+            <View wrap={false}>
+              <Text style={s.sectionTitle}>Experience</Text>
+            </View>
             {groups.map((group, i) => {
               const multi = group.roles.length > 1
               return (
-                <View key={i} style={s.group} wrap={false}>
-                  <Text style={s.orgName}>{group.org}</Text>
-                  {group.roles.map((r, j) => (
-                    <View key={j} style={multi ? s.roleBlockIndented : s.roleBlock}>
-                      <View style={s.roleHeader}>
-                        <Text style={s.roleTitle}>{r.title}</Text>
-                        {r.dates ? <Text style={s.roleDates}>{r.dates}</Text> : null}
-                      </View>
-                      {r.bullets.map((b, k) => (
-                        <View key={k} style={s.bullet}>
-                          <Text style={s.bulletDot}>•</Text>
-                          <Text style={s.bulletText}>{b}</Text>
+                <View key={i} style={s.group}>
+                  {group.roles.map((r, j) => {
+                    const roleBody = (
+                      <View style={multi ? s.roleBlockIndented : s.roleBlock}>
+                        <View style={s.roleHeader}>
+                          <Text style={s.roleTitle}>{r.title}</Text>
+                          {r.dates ? <Text style={s.roleDates}>{r.dates}</Text> : null}
                         </View>
-                      ))}
-                    </View>
-                  ))}
+                        {r.bullets.map((b, k) => (
+                          <View key={k} style={s.bullet}>
+                            <Text style={s.bulletDot}>•</Text>
+                            <Text style={s.bulletText}>{b}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )
+                    // First role carries the company header so the header is never
+                    // orphaned at a page bottom; each role is an atomic, unsplittable unit.
+                    return (
+                      <View key={j} wrap={false}>
+                        {j === 0 ? <Text style={s.orgName}>{group.org}</Text> : null}
+                        {roleBody}
+                      </View>
+                    )
+                  })}
                 </View>
               )
             })}
@@ -113,7 +129,9 @@ export function CVDocument({ cv }: { cv: CVJson }) {
         {/* Education */}
         {cv.education.length ? (
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Education</Text>
+            <View wrap={false}>
+              <Text style={s.sectionTitle}>Education</Text>
+            </View>
             {cv.education.map((ed, i) => (
               <View key={i} style={s.eduEntry} wrap={false}>
                 <View style={s.eduHeader}>
@@ -126,17 +144,17 @@ export function CVDocument({ cv }: { cv: CVJson }) {
           </View>
         ) : null}
 
-        {/* Skills */}
+        {/* Skills — keep the whole block together */}
         {cv.skills.length ? (
-          <View style={s.section}>
+          <View style={s.section} wrap={false}>
             <Text style={s.sectionTitle}>Skills</Text>
             <Text style={s.inlineList}>{cv.skills.join('   •   ')}</Text>
           </View>
         ) : null}
 
-        {/* Extras */}
+        {/* Extras — keep each block's heading with its items */}
         {(cv.extras ?? []).map((ex, i) => (
-          <View key={i} style={s.section}>
+          <View key={i} style={s.section} wrap={false}>
             <Text style={s.sectionTitle}>{ex.heading}</Text>
             <Text style={s.inlineList}>{ex.items.join('   •   ')}</Text>
           </View>

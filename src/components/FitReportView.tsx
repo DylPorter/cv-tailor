@@ -5,7 +5,7 @@ import type { FitReport } from '../types'
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function FitReportView({ report }: { report: FitReport }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="text-sm">

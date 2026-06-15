@@ -10,6 +10,7 @@ import { requestTailor } from '../lib/api'
 import { getMaster, getPrefs, saveCV, bumpGenerated } from '../store/storage'
 import { renderPdf } from '../render/pdf'
 import { renderDocx } from '../render/docx'
+import { measurePdf } from '../lib/pdfMeasure'
 import { triggerDownload } from '../lib/download'
 import { resumeFilename } from '../lib/filename'
 import type { CVJson, FitReport } from '../types'
@@ -52,6 +53,7 @@ export function Generate() {
   const [jd, setJd] = useState('')
   const [label, setLabel] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [genStatus, setGenStatus] = useState('Tailoring your CV…')
   const [genError, setGenError] = useState('')
   const hasGenerated = useRef(false)
 
@@ -78,16 +80,69 @@ export function Generate() {
   async function tailor() {
     if (!master || !jd.trim()) return
     setGenerating(true)
+    setGenStatus('Tailoring your CV…')
     setGenError('')
     try {
-      const res = await requestTailor({
+      const initial = await requestTailor({
         password,
         master: master.text,
         jd,
         prefs: getPrefs(),
       })
-      setCv(res.cv)
-      setFitReport(res.fitReport)
+      let cv = initial.cv
+      let fit = initial.fitReport
+
+      // Length-optimization loop: a CV should be a clean 1 page or a full
+      // 2 pages — never a sparse spill onto a near-empty second page. This runs
+      // only on the INITIAL generate; manual chat refines stay one-shot.
+      // Fully guarded: if rendering/measuring ever throws, we keep the result
+      // we already have and never block the user on the optimizer.
+      try {
+        setGenStatus('Optimising length…')
+        for (let pass = 0; pass < 2; pass++) {
+          const metrics = await measurePdf(await renderPdf(cv))
+          if (metrics.pages <= 1) break // ideal: one page
+          if (metrics.pages === 2 && metrics.lastPageFillRatio >= 0.55) break // legit full two-pager
+
+          const instruction =
+            metrics.pages === 2 && metrics.lastPageFillRatio < 0.55
+              ? 'Your CV rendered to two pages but the second page is nearly empty — this looks unprofessional. Compress it to fit EXACTLY ONE page: tighten the summary, cut the weakest bullets, and trim or merge the least-relevant older roles. Keep all the strongest, most relevant content.'
+              : `Your CV rendered to ${metrics.pages} pages, which is too long. Cut it down to a tight TWO pages maximum — drop the least-relevant roles and bullets, keep the strongest evidence.`
+
+          const refined = await requestTailor({
+            password,
+            master: master.text,
+            jd,
+            prefs: getPrefs(),
+            priorCv: cv,
+            refineInstruction: instruction,
+          })
+          cv = refined.cv
+          fit = refined.fitReport
+        }
+
+        // Final guard: if it's still a sparse two-pager after the loop, one page
+        // isn't achievable without dropping strong content — so use the space well.
+        const finalMetrics = await measurePdf(await renderPdf(cv)).catch(() => null)
+        if (finalMetrics && finalMetrics.pages === 2 && finalMetrics.lastPageFillRatio < 0.5) {
+          const filled = await requestTailor({
+            password,
+            master: master.text,
+            jd,
+            prefs: getPrefs(),
+            priorCv: cv,
+            refineInstruction:
+              'This CV needs two pages but the second is sparse. Since one page is not achievable without dropping strong content, instead use the full two pages well: add depth (an extra strong bullet) to the top 2–3 roles and a slightly fuller summary so both pages feel complete and intentional. Do not pad with fluff.',
+          })
+          cv = filled.cv
+          fit = filled.fitReport
+        }
+      } catch {
+        // Optimizer failed — fall back to the result we already have.
+      }
+
+      setCv(cv)
+      setFitReport(fit)
       if (!hasGenerated.current) {
         bumpGenerated()
         hasGenerated.current = true
@@ -179,7 +234,7 @@ export function Generate() {
                       animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
                     />
-                    Tailoring your CV…
+                    {genStatus}
                   </span>
                 ) : (
                   'Tailor my CV →'
