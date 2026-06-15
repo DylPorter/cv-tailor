@@ -90,8 +90,10 @@ Output STRICT JSON only, matching EXACTLY this shape (do not rename fields, do n
     "gaps": string[],
     "keywordsMirrored": string[]
   },
-  "note"?: string
+  "note"?: string,
+  "targetRole"?: string
 }
+Set "targetRole" to the specific job title from the TARGET JOB DESCRIPTION (e.g. "Operations Director", "Product Manager") — the role title only, no company name. It is used to name the downloaded file.
 Use "extras" sparingly and only for genuinely relevant items (e.g. languages, key certifications) — never as a dumping ground. Do not include any prose, markdown, or code fences outside the JSON object.`
 
 export function buildMessages(args: BuildArgs): ChatMessage[] {

@@ -40,8 +40,8 @@ export async function buildExportZip(): Promise<Blob> {
     const field = sanitize(s.field || 'General')
     const folder = zip.folder(field)!
 
-    let pdfName = resumeFilename(s.cv.name, s.label, 'pdf')
-    let docxName = resumeFilename(s.cv.name, s.label, 'docx')
+    let pdfName = resumeFilename(s.cv.name, s.role || s.label, 'pdf')
+    let docxName = resumeFilename(s.cv.name, s.role || s.label, 'docx')
 
     // Disambiguate filename collisions within a field with a short id suffix.
     if (used.has(`${field}/${pdfName}`)) {

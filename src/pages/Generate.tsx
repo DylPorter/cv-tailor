@@ -59,6 +59,7 @@ export function Generate() {
 
   const [cv, setCv] = useState<CVJson | null>(null)
   const [fitReport, setFitReport] = useState<FitReport | null>(null)
+  const [targetRole, setTargetRole] = useState('')
 
   // Routes guarantee a master before /generate, but guard anyway.
   if (!master) {
@@ -91,6 +92,7 @@ export function Generate() {
       })
       let cv = initial.cv
       let fit = initial.fitReport
+      let role = initial.targetRole?.trim() || ''
 
       // Length-optimization loop: a CV should be a clean 1 page or a full
       // 2 pages — never a sparse spill onto a near-empty second page. This runs
@@ -119,6 +121,7 @@ export function Generate() {
           })
           cv = refined.cv
           fit = refined.fitReport
+          role = refined.targetRole?.trim() || role
         }
 
         // Final guard: if it's still a sparse two-pager after the loop, one page
@@ -136,6 +139,7 @@ export function Generate() {
           })
           cv = filled.cv
           fit = filled.fitReport
+          role = filled.targetRole?.trim() || role
         }
       } catch {
         // Optimizer failed — fall back to the result we already have.
@@ -143,6 +147,7 @@ export function Generate() {
 
       setCv(cv)
       setFitReport(fit)
+      setTargetRole(role)
       if (!hasGenerated.current) {
         bumpGenerated()
         hasGenerated.current = true
@@ -259,6 +264,7 @@ export function Generate() {
                 fitReport={fitReport}
                 jd={jd}
                 defaultLabel={label}
+                targetRole={targetRole}
                 password={password}
                 master={master.text}
                 onUpdate={(nextCv, nextReport) => {
@@ -280,6 +286,7 @@ function ResultView({
   fitReport,
   jd,
   defaultLabel,
+  targetRole,
   password,
   master,
   onUpdate,
@@ -289,12 +296,16 @@ function ResultView({
   fitReport: FitReport
   jd: string
   defaultLabel: string
+  targetRole: string
   password: string
   master: string
   onUpdate: (cv: CVJson, report: FitReport) => void
   onStartOver: () => void
 }) {
-  const [saveLabel, setSaveLabel] = useState(defaultLabel || cv.name)
+  const [saveLabel, setSaveLabel] = useState(defaultLabel)
+  // Role used to name downloaded files: a typed label overrides; blank falls
+  // back to the role auto-detected from the job description. Never the name.
+  const roleForFile = saveLabel.trim() || targetRole || ''
   const [saveField, setSaveField] = useState('')
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -307,8 +318,9 @@ function ResultView({
     setSaveError('')
     try {
       saveCV({
-        label: saveLabel.trim() || cv.name,
+        label: saveLabel.trim() || targetRole || cv.name,
         field: saveField.trim() || 'General',
+        role: roleForFile,
         jd,
         cv,
         fitReport,
@@ -370,7 +382,7 @@ function ResultView({
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={async () =>
-                triggerDownload(await renderPdf(cv), resumeFilename(cv.name, saveLabel || defaultLabel, 'pdf'))
+                triggerDownload(await renderPdf(cv), resumeFilename(cv.name, roleForFile, 'pdf'))
               }
             >
               PDF
@@ -378,7 +390,7 @@ function ResultView({
             <Button
               variant="outline"
               onClick={async () =>
-                triggerDownload(await renderDocx(cv), resumeFilename(cv.name, saveLabel || defaultLabel, 'docx'))
+                triggerDownload(await renderDocx(cv), resumeFilename(cv.name, roleForFile, 'docx'))
               }
             >
               .docx
@@ -388,12 +400,12 @@ function ResultView({
           <div className="mt-6 border-t border-line pt-5">
             <label className="block">
               <span className="block text-sm font-medium text-ink-soft mb-2">
-                Save to folder
+                Role / title <span className="text-ink-faint font-normal">(names the file)</span>
               </span>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="Label this CV"
+                placeholder="Defaults to the role from the job description"
                 value={saveLabel}
                 onChange={(e) => {
                   setSaveLabel(e.target.value)

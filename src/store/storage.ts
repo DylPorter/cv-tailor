@@ -43,6 +43,7 @@ function newId(): string {
 
 export function saveCV(input: {
   label: string
+  role?: string
   field?: string
   jd: string
   cv: CVJson

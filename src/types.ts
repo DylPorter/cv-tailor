@@ -50,6 +50,7 @@ export interface TailorResponse {
   cv: CVJson
   fitReport: FitReport
   note?: string
+  targetRole?: string
 }
 
 export interface MasterProfile {
@@ -60,6 +61,7 @@ export interface MasterProfile {
 export interface SavedCV {
   id: string
   label: string
+  role?: string
   field?: string
   jd: string
   cv: CVJson

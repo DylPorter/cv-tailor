@@ -16,8 +16,10 @@ beforeEach(() => localStorage.clear())
 
 function seed() {
   setMaster('my universal history')
+  // Entry WITHOUT a role → file name falls back to the label.
   saveCV({ label: 'Uni — Lecturer', field: 'Academic', jd: 'J', cv: SAMPLE_CV, fitReport: SAMPLE_FIT })
-  saveCV({ label: 'Acme — Ops', jd: 'J', cv: SAMPLE_CV, fitReport: SAMPLE_FIT })
+  // Entry WITH a stored role → file name uses the role, not the label.
+  saveCV({ label: 'Acme — Ops', role: 'Operations Director', jd: 'J', cv: SAMPLE_CV, fitReport: SAMPLE_FIT })
 }
 
 describe('zipExport', () => {
@@ -43,10 +45,12 @@ describe('zipExport', () => {
     expect(await zip.file('Universal Profile.txt')!.async('string')).toBe('my universal history')
 
     // Flat: {Field}/{Name}_Resume_{Role}.{ext}, no wrapper or per-CV subfolder.
+    // No stored role → falls back to the label.
     expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.pdf')).not.toBeNull()
     expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.docx')).not.toBeNull()
-    expect(zip.file('General/Alan_Porter_Resume_Acme_Ops.pdf')).not.toBeNull()
-    expect(zip.file('General/Alan_Porter_Resume_Acme_Ops.docx')).not.toBeNull()
+    // Stored role → file name uses the role, NOT the label ("Acme — Ops").
+    expect(zip.file('General/Alan_Porter_Resume_Operations_Director.pdf')).not.toBeNull()
+    expect(zip.file('General/Alan_Porter_Resume_Operations_Director.docx')).not.toBeNull()
 
     // No legacy wrapper folder.
     expect(zip.file(/^Tailored CVs\//)).toHaveLength(0)

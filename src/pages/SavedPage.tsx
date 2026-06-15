@@ -89,7 +89,7 @@ export function SavedPage() {
                 <Button
                   variant="outline"
                   onClick={async () =>
-                    triggerDownload(await renderPdf(cv.cv), resumeFilename(cv.cv.name, cv.label, 'pdf'))
+                    triggerDownload(await renderPdf(cv.cv), resumeFilename(cv.cv.name, cv.role || cv.label, 'pdf'))
                   }
                 >
                   PDF
@@ -97,7 +97,7 @@ export function SavedPage() {
                 <Button
                   variant="outline"
                   onClick={async () =>
-                    triggerDownload(await renderDocx(cv.cv), resumeFilename(cv.cv.name, cv.label, 'docx'))
+                    triggerDownload(await renderDocx(cv.cv), resumeFilename(cv.cv.name, cv.role || cv.label, 'docx'))
                   }
                 >
                   .docx
@@ -137,7 +137,7 @@ export function SavedPage() {
             <div className="flex flex-wrap gap-2">
               <Button
                 onClick={async () =>
-                  triggerDownload(await renderPdf(opened.cv), resumeFilename(opened.cv.name, opened.label, 'pdf'))
+                  triggerDownload(await renderPdf(opened.cv), resumeFilename(opened.cv.name, opened.role || opened.label, 'pdf'))
                 }
               >
                 Download PDF
@@ -145,7 +145,7 @@ export function SavedPage() {
               <Button
                 variant="outline"
                 onClick={async () =>
-                  triggerDownload(await renderDocx(opened.cv), resumeFilename(opened.cv.name, opened.label, 'docx'))
+                  triggerDownload(await renderDocx(opened.cv), resumeFilename(opened.cv.name, opened.role || opened.label, 'docx'))
                 }
               >
                 Download .docx
