@@ -43,6 +43,7 @@ function newId(): string {
 
 export function saveCV(input: {
   label: string
+  field?: string
   jd: string
   cv: CVJson
   fitReport: FitReport

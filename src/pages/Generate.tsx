@@ -239,6 +239,7 @@ function ResultView({
   onStartOver: () => void
 }) {
   const [saveLabel, setSaveLabel] = useState(defaultLabel || cv.name)
+  const [saveField, setSaveField] = useState('')
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -249,7 +250,13 @@ function ResultView({
   function save() {
     setSaveError('')
     try {
-      saveCV({ label: saveLabel.trim() || cv.name, jd, cv, fitReport })
+      saveCV({
+        label: saveLabel.trim() || cv.name,
+        field: saveField.trim() || 'General',
+        jd,
+        cv,
+        fitReport,
+      })
       setSaved(true)
     } catch (err) {
       setSaveError((err as Error).message)
@@ -329,6 +336,21 @@ function ResultView({
                 value={saveLabel}
                 onChange={(e) => {
                   setSaveLabel(e.target.value)
+                  setSaved(false)
+                }}
+              />
+            </label>
+            <label className="block mt-3">
+              <span className="block text-xs font-medium text-ink-faint mb-1.5">
+                Field <span className="font-normal">(optional)</span>
+              </span>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="Academic, Operations… (defaults to General)"
+                value={saveField}
+                onChange={(e) => {
+                  setSaveField(e.target.value)
                   setSaved(false)
                 }}
               />

@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
@@ -31,14 +31,26 @@ function newId(): string {
 
 export function Onboarding() {
   const navigate = useNavigate()
+  const location = useLocation()
   const password = usePassword()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [stepIndex, setStepIndex] = useState(0)
+  // When arriving from Load → "Build my universal profile from these", the CV
+  // texts are passed via router state. Pre-seed them and jump to the build step.
+  const seeded = (location.state as { seededCvs?: string[] } | null)?.seededCvs
+  const seededCvs: CvEntry[] = (seeded ?? []).map((text, i) => ({
+    id: `seeded-${i}`,
+    name: `Imported CV ${i + 1}`,
+    text,
+  }))
+  const hasSeed = seededCvs.length > 0
+
+  const buildIndex = STEPS.indexOf('build')
+  const [stepIndex, setStepIndex] = useState(hasSeed ? buildIndex : 0)
   const [dir, setDir] = useState(1)
   const step: Step = STEPS[stepIndex]
 
-  const [cvs, setCvs] = useState<CvEntry[]>([])
+  const [cvs, setCvs] = useState<CvEntry[]>(seededCvs)
   const [pasteText, setPasteText] = useState('')
   const [parseError, setParseError] = useState('')
 
@@ -100,6 +112,13 @@ export function Onboarding() {
     next()
     if (!mergeStarted) void runMerge()
   }
+
+  // When seeded from Load, we land directly on the build step — start the merge.
+  // Deferred to a microtask so it doesn't setState synchronously inside the effect.
+  useEffect(() => {
+    if (hasSeed && !mergeStarted) void Promise.resolve().then(() => runMerge())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function acceptProfile() {
     setMaster(merged)

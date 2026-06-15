@@ -59,6 +59,7 @@ export interface MasterProfile {
 export interface SavedCV {
   id: string
   label: string
+  field?: string
   jd: string
   cv: CVJson
   fitReport: FitReport

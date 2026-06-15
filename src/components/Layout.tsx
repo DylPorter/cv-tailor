@@ -1,9 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '../ui/Button'
-import { exportData, importData } from '../store/storage'
-import { triggerDownload } from '../lib/download'
+import { ExportModal } from './ExportModal'
+import { LoadModal } from './LoadModal'
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
@@ -13,29 +13,8 @@ const navItems = [
 
 export function Layout({ onLock, children }: { onLock: () => void; children: ReactNode }) {
   const location = useLocation()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [restoreError, setRestoreError] = useState('')
-
-  function backup() {
-    triggerDownload(
-      new Blob([exportData()], { type: 'application/json' }),
-      'cv-tailor-backup.json',
-    )
-  }
-
-  async function onRestore(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setRestoreError('')
-    try {
-      importData(await file.text())
-      window.location.reload()
-    } catch (err) {
-      setRestoreError((err as Error).message)
-    } finally {
-      e.target.value = ''
-    }
-  }
+  const [exportOpen, setExportOpen] = useState(false)
+  const [loadOpen, setLoadOpen] = useState(false)
 
   return (
     <div className="grain min-h-screen bg-paper">
@@ -76,24 +55,22 @@ export function Layout({ onLock, children }: { onLock: () => void; children: Rea
             </nav>
 
             <div className="flex items-center gap-1.5 shrink-0">
-              <Button variant="ghost" size="md" className="px-3 py-2" onClick={backup}>
-                Back up
+              <Button
+                variant="ghost"
+                size="md"
+                className="px-3 py-2"
+                onClick={() => setExportOpen(true)}
+              >
+                Export
               </Button>
               <Button
                 variant="ghost"
                 size="md"
                 className="px-3 py-2"
-                onClick={() => fileRef.current?.click()}
+                onClick={() => setLoadOpen(true)}
               >
-                Restore
+                Load
               </Button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="application/json,.json"
-                className="hidden"
-                onChange={onRestore}
-              />
               <Button variant="outline" size="md" className="px-3 py-2" onClick={onLock}>
                 Lock
               </Button>
@@ -119,13 +96,8 @@ export function Layout({ onLock, children }: { onLock: () => void; children: Rea
           </nav>
         </header>
 
-        {restoreError && (
-          <div className="max-w-5xl mx-auto px-6 pt-4">
-            <p className="rounded-lg border border-clay/30 bg-clay-soft/40 px-4 py-2.5 text-sm text-clay-deep">
-              {restoreError}
-            </p>
-          </div>
-        )}
+        <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
+        <LoadModal open={loadOpen} onClose={() => setLoadOpen(false)} />
 
         <main className="max-w-5xl mx-auto px-6 py-10 sm:py-14">
           <AnimatePresence mode="wait">
