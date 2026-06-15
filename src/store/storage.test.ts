@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { getMaster, setMaster, listSaved, saveCV, deleteSaved } from './storage'
+import { getMaster, setMaster, listSaved, saveCV, deleteSaved, exportData, importData } from './storage'
 import { SAMPLE_CV, SAMPLE_FIT } from '../sample'
 
 beforeEach(() => localStorage.clear())
@@ -19,5 +19,21 @@ describe('storage', () => {
     expect(listSaved()).toHaveLength(1)
     deleteSaved(saved.id)
     expect(listSaved()).toEqual([])
+  })
+
+  it('exports and re-imports all data', () => {
+    setMaster('history')
+    saveCV({ label: 'Acme', jd: 'J', cv: SAMPLE_CV, fitReport: SAMPLE_FIT })
+    const json = exportData()
+    localStorage.clear()
+    expect(getMaster()).toBeNull()
+    expect(listSaved()).toEqual([])
+    importData(json)
+    expect(getMaster()?.text).toBe('history')
+    expect(listSaved()).toHaveLength(1)
+  })
+
+  it('throws on malformed import payload', () => {
+    expect(() => importData('not json')).toThrow()
   })
 })

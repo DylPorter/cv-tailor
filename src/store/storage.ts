@@ -42,3 +42,23 @@ export function saveCV(input: {
 export function deleteSaved(id: string): void {
   writeSaved(listSaved().filter((s) => s.id !== id))
 }
+
+interface BackupShape {
+  version: 1
+  master: MasterProfile | null
+  saved: SavedCV[]
+}
+
+export function exportData(): string {
+  const backup: BackupShape = { version: 1, master: getMaster(), saved: listSaved() }
+  return JSON.stringify(backup, null, 2)
+}
+
+export function importData(json: string): void {
+  const parsed = JSON.parse(json) as BackupShape
+  if (typeof parsed !== 'object' || parsed === null || !Array.isArray(parsed.saved)) {
+    throw new Error('That file is not a valid cv-tailor backup.')
+  }
+  if (parsed.master) localStorage.setItem(MASTER_KEY, JSON.stringify(parsed.master))
+  writeSaved(parsed.saved)
+}
