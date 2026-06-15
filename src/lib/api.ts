@@ -6,6 +6,7 @@ export interface TailorRequest {
   jd: string
   priorCv?: CVJson
   refineInstruction?: string
+  prefs?: string
 }
 
 export async function requestTailor(req: TailorRequest): Promise<TailorResponse> {

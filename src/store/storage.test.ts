@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { getMaster, setMaster, listSaved, saveCV, deleteSaved, exportData, importData } from './storage'
+import { getMaster, setMaster, listSaved, saveCV, deleteSaved, exportData, importData, getPrefs, setPrefs } from './storage'
 import { SAMPLE_CV, SAMPLE_FIT } from '../sample'
 
 beforeEach(() => localStorage.clear())
@@ -35,5 +35,16 @@ describe('storage', () => {
 
   it('throws on malformed import payload', () => {
     expect(() => importData('not json')).toThrow()
+  })
+
+  it('round-trips preferences and includes them in backup', () => {
+    setPrefs('UK English, concise')
+    expect(getPrefs()).toBe('UK English, concise')
+    setMaster('h')
+    const json = exportData()
+    localStorage.clear()
+    expect(getPrefs()).toBe('')
+    importData(json)
+    expect(getPrefs()).toBe('UK English, concise')
   })
 })

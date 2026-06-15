@@ -9,6 +9,7 @@ export interface TailorInput {
   jd: string
   priorCv?: CVJson
   refineInstruction?: string
+  prefs?: string
 }
 
 export interface TailorDeps {
@@ -54,6 +55,7 @@ export async function tailor(input: TailorInput, deps: TailorDeps): Promise<Tail
     jd: input.jd,
     priorCv: input.priorCv,
     refineInstruction: input.refineInstruction,
+    prefs: input.prefs,
   })
 
   for (let attempt = 0; attempt < 2; attempt++) {

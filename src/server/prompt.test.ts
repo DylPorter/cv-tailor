@@ -27,4 +27,14 @@ describe('buildMessages', () => {
     expect(userContent).toContain('make it shorter')
     expect(userContent).toContain('"name":"X"')
   })
+
+  it('includes preferences when provided', () => {
+    const msgs = buildMessages({ master: 'M', jd: 'J', prefs: 'UK English only' })
+    expect(JSON.stringify(msgs)).toContain('UK English only')
+  })
+
+  it('omits the preferences block when prefs is empty', () => {
+    const msgs = buildMessages({ master: 'M', jd: 'J', prefs: '   ' })
+    expect(JSON.stringify(msgs)).not.toContain('STANDING INSTRUCTIONS')
+  })
 })

@@ -10,6 +10,7 @@ export interface BuildArgs {
   jd: string
   priorCv?: CVJson
   refineInstruction?: string
+  prefs?: string
 }
 
 const SYSTEM = `You are an expert CV editor. You tailor an existing career history to a specific job.
@@ -43,6 +44,9 @@ export function buildMessages(args: BuildArgs): ChatMessage[] {
     `MASTER CAREER HISTORY:\n${args.master}`,
     `\n\nTARGET JOB DESCRIPTION:\n${args.jd}`,
   ]
+  if (args.prefs && args.prefs.trim()) {
+    parts.push(`\n\nCANDIDATE PREFERENCES / STANDING INSTRUCTIONS (honour these unless the job description conflicts):\n${args.prefs}`)
+  }
   if (args.priorCv) {
     parts.push(`\n\nPREVIOUS TAILORED CV (refine this):\n${JSON.stringify(args.priorCv)}`)
   }
