@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { TailorPanel } from './TailorPanel'
-import { SAMPLE_CV, SAMPLE_FIT } from '../sample'
+import { SAMPLE_CV } from '../sample'
 
 vi.mock('../lib/api', async () => {
   const { SAMPLE_CV, SAMPLE_FIT } = await import('../sample')
