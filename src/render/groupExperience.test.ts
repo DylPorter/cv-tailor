@@ -9,32 +9,32 @@ function role(title: string, org: string): CVExperience {
 describe('groupExperienceByOrg', () => {
   it('groups consecutive same-org entries, keeping non-consecutive ones separate', () => {
     const experience: CVExperience[] = [
-      role('Director', 'British Council'),
-      role('Senior Manager', 'British Council'),
-      role('Manager', 'British Council'),
-      role('Tutor', 'Language Link'),
-      role('Volunteer', 'British Council'),
+      role('Director', 'Meridian Cultural Trust'),
+      role('Senior Manager', 'Meridian Cultural Trust'),
+      role('Manager', 'Meridian Cultural Trust'),
+      role('Tutor', 'Lexicon Tutors'),
+      role('Volunteer', 'Meridian Cultural Trust'),
     ]
     const groups = groupExperienceByOrg(experience)
     expect(groups).toHaveLength(3)
-    expect(groups[0].org).toBe('British Council')
+    expect(groups[0].org).toBe('Meridian Cultural Trust')
     expect(groups[0].roles).toHaveLength(3)
     expect(groups[0].roles.map((r) => r.title)).toEqual([
       'Director',
       'Senior Manager',
       'Manager',
     ])
-    expect(groups[1].org).toBe('Language Link')
+    expect(groups[1].org).toBe('Lexicon Tutors')
     expect(groups[1].roles).toHaveLength(1)
-    expect(groups[2].org).toBe('British Council')
+    expect(groups[2].org).toBe('Meridian Cultural Trust')
     expect(groups[2].roles).toHaveLength(1)
     expect(groups[2].roles[0].title).toBe('Volunteer')
   })
 
   it('matches org case-insensitively and trimmed', () => {
     const experience: CVExperience[] = [
-      role('A', 'British Council'),
-      role('B', '  british council '),
+      role('A', 'Meridian Cultural Trust'),
+      role('B', '  meridian cultural trust '),
     ]
     const groups = groupExperienceByOrg(experience)
     expect(groups).toHaveLength(1)

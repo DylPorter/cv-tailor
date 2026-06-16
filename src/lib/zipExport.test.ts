@@ -46,11 +46,11 @@ describe('zipExport', () => {
 
     // Flat: {Field}/{Name}_Resume_{Role}.{ext}, no wrapper or per-CV subfolder.
     // No stored role → falls back to the label.
-    expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.pdf')).not.toBeNull()
-    expect(zip.file('Academic/Alan_Porter_Resume_Uni_Lecturer.docx')).not.toBeNull()
+    expect(zip.file('Academic/Jordan_Avery_Resume_Uni_Lecturer.pdf')).not.toBeNull()
+    expect(zip.file('Academic/Jordan_Avery_Resume_Uni_Lecturer.docx')).not.toBeNull()
     // Stored role → file name uses the role, NOT the label ("Acme — Ops").
-    expect(zip.file('General/Alan_Porter_Resume_Operations_Director.pdf')).not.toBeNull()
-    expect(zip.file('General/Alan_Porter_Resume_Operations_Director.docx')).not.toBeNull()
+    expect(zip.file('General/Jordan_Avery_Resume_Operations_Director.pdf')).not.toBeNull()
+    expect(zip.file('General/Jordan_Avery_Resume_Operations_Director.docx')).not.toBeNull()
 
     // No legacy wrapper folder.
     expect(zip.file(/^Tailored CVs\//)).toHaveLength(0)
