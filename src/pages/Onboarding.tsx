@@ -300,10 +300,16 @@ export function Onboarding() {
 
                 {!merging && !mergeError && (
                   <>
-                    <p className="text-ink-soft leading-relaxed mb-5">
+                    <p className="text-ink-soft leading-relaxed mb-4">
                       Here&apos;s everything from your CVs, folded into one. Read it over and
                       tweak anything that&apos;s off — this is the source we tailor from.
                     </p>
+                    <div className="mb-5 rounded-xl border border-sage/30 bg-sage/5 px-4 py-3 text-sm text-ink-soft leading-relaxed">
+                      <span className="font-medium text-ink">Tip: add real numbers.</span>{' '}
+                      Where you can, put genuine figures in here — budgets, %, team sizes, client
+                      counts, dates. Automated CV screeners (ATS) favour metrics, and this tool will
+                      only ever use numbers that are actually in your profile — it never invents them.
+                    </div>
                     <textarea
                       rows={16}
                       className={`${inputClass} font-sans text-sm leading-relaxed`}
