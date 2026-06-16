@@ -31,8 +31,8 @@ I built this for my dad. He'd been in the same organisation for about 20 years a
 
 |  |  |
 | --- | --- |
-| <img src="docs/screenshots/cvt-02-dashboard.png" alt="Dashboard" width="430"><br>**One universal profile.** Your master CV, the number you've generated, and every saved CV, all on one page. | <img src="docs/screenshots/cvt-03-input.png" alt="Paste a job description" width="430"><br>**Paste a job.** Drop in the job description and it shapes a CV to fit, then shows you an honest fit report. |
-| <img src="docs/screenshots/cvt-05-saved.png" alt="Saved CVs" width="430"><br>**Saved locally.** Every tailored CV stays in your browser, ready to re-download as a PDF or a Word file. | <img src="docs/screenshots/cvt-01-gate.png" alt="Password gate" width="430"><br>**Shared-password gate** so the model can't be called, and your API key can't be burned, by random visitors. |
+| <img src="docs/screenshots/cvt-02-dashboard.png" alt="Dashboard" width="430"><br>**One universal profile.** Your master CV and every tailored CV, on one page. | <img src="docs/screenshots/cvt-03-input.png" alt="Paste a job description" width="430"><br>**Paste a job.** It shapes a CV to fit and shows you an honest fit report. |
+| <img src="docs/screenshots/cvt-05-saved.png" alt="Saved CVs" width="430"><br>**Saved locally.** Every tailored CV stays in your browser, as PDF or Word. | <img src="docs/screenshots/cvt-01-gate.png" alt="Password gate" width="430"><br>**Shared-password gate** keeps random visitors from burning your API key. |
 
 ## What it won't do
 
