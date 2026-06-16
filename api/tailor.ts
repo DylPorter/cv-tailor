@@ -1,7 +1,10 @@
 import { tailor, type TailorInput } from '../src/server/tailor-core.js'
 import { callLLM } from '../src/server/llm.js'
 
-export const config = { runtime: 'nodejs' }
+// maxDuration: a single tailor call (large master + the rigorous prompt) can run
+// ~10–15s on DeepSeek — past Vercel's 10s default, which closes the connection
+// (ERR_CONNECTION_CLOSED). 60s is the Hobby-plan ceiling and gives ample headroom.
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 // PRIVACY GUARD: the request body contains the user's master profile (full CV),
 // the job description, and the tailored CV/fit report the model returns — all

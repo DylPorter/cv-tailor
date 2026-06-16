@@ -1,7 +1,9 @@
 import { mergeProfiles, type MergeInput } from '../src/server/merge-core.js'
 import { callLLM } from '../src/server/llm.js'
 
-export const config = { runtime: 'nodejs' }
+// maxDuration: merging several CVs into one master profile is a large LLM call
+// that can exceed Vercel's 10s default (ERR_CONNECTION_CLOSED). 60s = Hobby ceiling.
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 // PRIVACY GUARD: the body contains the user's CVs (full PII). Never log
 // body/cvs/result. Vercel captures function logs.
